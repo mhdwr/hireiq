@@ -10,7 +10,7 @@ export default async function handler(req, res) {
   }
 
   try {
-    const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+    const groqResponse = await fetch('https://api.groq.com/openai/v1/chat/completions', {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${process.env.GROQ_API_KEY}`,
@@ -40,22 +40,22 @@ export default async function handler(req, res) {
       })
     })
 
-    const data = await response.json()
+    const data = await groqResponse.json()
+    console.log('Groq status:', groqResponse.status)
+    console.log('Groq response:', JSON.stringify(data))
 
     if (!data.choices || data.choices.length === 0) {
-        console.error('Groq API error:', JSON.stringify(data))
-        return res.status(500).json({ error: 'Groq API error', details: data })
+      return res.status(500).json({ error: 'Groq API failed', details: data })
     }
 
     const content = data.choices[0].message.content
-    
     const clean = content.replace(/```json|```/g, '').trim()
     const parsed = JSON.parse(clean)
 
     return res.status(200).json(parsed)
 
   } catch (err) {
-    console.error(err)
-    return res.status(500).json({ error: 'Something went wrong' })
+    console.error('Handler error:', err.message)
+    return res.status(500).json({ error: err.message })
   }
 }
