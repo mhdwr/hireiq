@@ -69,41 +69,12 @@ export default function Dashboard({ onResults }) {
       for (const file of cvFiles) {
         const cvText = await readFileAsText(file)
 
-        const response = await axios.post(
-          'https://api.groq.com/openai/v1/chat/completions',
-          {
-            model: 'llama-3.3-70b-versatile',
-            messages: [
-              {
-                role: 'system',
-                content: `You are an expert HR recruiter. Analyze the CV against the job description and respond ONLY in this exact JSON format:
-{
-  "name": "candidate full name or Unknown",
-  "matchScore": <number 0-100>,
-  "matchedSkills": ["skill1", "skill2"],
-  "missingSkills": ["skill1", "skill2"],
-  "summary": "2 sentence summary of candidate fit"
-}`
-              },
-              {
-                role: 'user',
-                content: `JOB DESCRIPTION:\n${jobDesc}\n\nCV CONTENT:\n${cvText.slice(0, 3000)}`
-              }
-            ],
-            temperature: 0.3,
-            max_tokens: 500
-          },
-          {
-            headers: {
-              'Authorization': `Bearer ${import.meta.env.VITE_GROQ_API_KEY}`,
-              'Content-Type': 'application/json'
-            }
-          }
-        )
+        const response = await axios.post('/api/screen', {
+          cvText,
+          jobDesc
+        })
 
-        const content = response.data.choices[0].message.content
-        const clean = content.replace(/```json|```/g, '').trim()
-        const parsed = JSON.parse(clean)
+        const parsed = response.data
         results.push({ ...parsed, fileName: file.name })
         await delay(2000)
       }
