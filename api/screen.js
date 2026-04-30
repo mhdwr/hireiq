@@ -41,7 +41,14 @@ export default async function handler(req, res) {
     })
 
     const data = await response.json()
+
+    if (!data.choices || data.choices.length === 0) {
+        console.error('Groq API error:', JSON.stringify(data))
+        return res.status(500).json({ error: 'Groq API error', details: data })
+    }
+
     const content = data.choices[0].message.content
+    
     const clean = content.replace(/```json|```/g, '').trim()
     const parsed = JSON.parse(clean)
 
