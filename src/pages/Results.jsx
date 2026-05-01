@@ -6,6 +6,8 @@ export default function Results({ results, onBack }) {
   const [filter, setFilter] = useState('all')
   const [sortBy, setSortBy] = useState('score')
 
+  const isMobile = window.innerWidth < 768
+
   const filtered = results
     .filter(r => {
       if (filter === 'top') return r.matchScore >= 70
@@ -47,7 +49,7 @@ export default function Results({ results, onBack }) {
   }
 
   return (
-    <div style={{ minHeight: '100vh', background: 'var(--bg)', padding: '40px' }}>
+    <div style={{ minHeight: '100vh', background: 'var(--bg)', padding: isMobile ? '20px' : '40px' }}>
 
       {/* Header */}
       <motion.div
@@ -55,7 +57,11 @@ export default function Results({ results, onBack }) {
         animate={{ opacity: 1, y: 0 }}
         style={{ maxWidth: '1000px', margin: '0 auto 32px' }}>
 
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '24px' }}>
+        <div style={{
+          display: 'flex', alignItems: 'center',
+          justifyContent: 'space-between', marginBottom: '24px',
+          flexWrap: 'wrap', gap: '12px'
+        }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
             <div style={{
               width: '36px', height: '36px',
@@ -68,7 +74,7 @@ export default function Results({ results, onBack }) {
             <span style={{ fontFamily: 'Syne', fontWeight: 800, fontSize: '22px' }}>HireIQ</span>
           </div>
 
-          <div style={{ display: 'flex', gap: '12px' }}>
+          <div style={{ display: 'flex', gap: '10px' }}>
             <motion.button
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
@@ -76,11 +82,12 @@ export default function Results({ results, onBack }) {
               style={{
                 background: 'var(--card)', color: 'var(--text)',
                 border: '1px solid var(--border)', borderRadius: '12px',
-                padding: '12px 24px', fontFamily: 'Syne',
+                padding: isMobile ? '10px 14px' : '12px 24px',
+                fontFamily: 'Syne',
                 fontWeight: 700, fontSize: '14px', cursor: 'pointer',
-                display: 'flex', alignItems: 'center', gap: '8px'
+                display: 'flex', alignItems: 'center', gap: '6px'
               }}>
-              <ArrowLeft size={16} /> Back
+              <ArrowLeft size={16} /> {!isMobile && 'Back'}
             </motion.button>
 
             <motion.button
@@ -90,24 +97,29 @@ export default function Results({ results, onBack }) {
               style={{
                 background: 'linear-gradient(135deg, var(--accent), var(--accent2))',
                 color: 'white', border: 'none', borderRadius: '12px',
-                padding: '12px 24px', fontFamily: 'Syne',
+                padding: isMobile ? '10px 14px' : '12px 24px',
+                fontFamily: 'Syne',
                 fontWeight: 700, fontSize: '14px', cursor: 'pointer',
-                display: 'flex', alignItems: 'center', gap: '8px'
+                display: 'flex', alignItems: 'center', gap: '6px'
               }}>
-              <Download size={16} /> Download CSV
+              <Download size={16} /> {!isMobile && 'Download CSV'}
             </motion.button>
           </div>
         </div>
 
-        <h1 style={{ fontSize: '36px', fontWeight: 800, fontFamily: 'Syne', marginBottom: '8px' }}>
+        <h1 style={{ fontSize: isMobile ? '26px' : '36px', fontWeight: 800, fontFamily: 'Syne', marginBottom: '8px' }}>
           Screening Results
         </h1>
-        <p style={{ color: 'var(--muted)' }}>
+        <p style={{ color: 'var(--muted)', fontSize: isMobile ? '14px' : '16px' }}>
           {results.length} CVs screened — top candidates ranked by AI match score
         </p>
 
         {/* Stats Row */}
-        <div style={{ display: 'flex', gap: '16px', marginTop: '24px' }}>
+        <div style={{
+          display: 'grid',
+          gridTemplateColumns: isMobile ? 'repeat(2, 1fr)' : 'repeat(4, 1fr)',
+          gap: '12px', marginTop: '24px'
+        }}>
           {[
             { label: 'Total Screened', value: results.length, color: 'var(--accent)' },
             { label: 'Strong Matches', value: results.filter(r => r.matchScore >= 70).length, color: '#00D4AA' },
@@ -116,10 +128,11 @@ export default function Results({ results, onBack }) {
           ].map((stat) => (
             <div key={stat.label} style={{
               background: 'var(--card)', borderRadius: '16px',
-              padding: '20px 24px', border: '1px solid var(--border)', flex: 1
+              padding: isMobile ? '16px' : '20px 24px',
+              border: '1px solid var(--border)'
             }}>
-              <div style={{ fontSize: '28px', fontWeight: 800, fontFamily: 'Syne', color: stat.color }}>{stat.value}</div>
-              <div style={{ fontSize: '13px', color: 'var(--muted)', marginTop: '4px' }}>{stat.label}</div>
+              <div style={{ fontSize: isMobile ? '22px' : '28px', fontWeight: 800, fontFamily: 'Syne', color: stat.color }}>{stat.value}</div>
+              <div style={{ fontSize: '12px', color: 'var(--muted)', marginTop: '4px' }}>{stat.label}</div>
             </div>
           ))}
         </div>
@@ -136,18 +149,18 @@ export default function Results({ results, onBack }) {
           justifyContent: 'space-between', flexWrap: 'wrap', gap: '12px'
         }}>
 
-        <div style={{ display: 'flex', gap: '8px' }}>
+        <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
           {[
             { key: 'all', label: 'All' },
-            { key: 'top', label: '🟢 Strong (70%+)' },
-            { key: 'mid', label: '🟡 Partial (40-69%)' },
-            { key: 'low', label: '🔴 Weak (<40%)' },
+            { key: 'top', label: '🟢 Strong' },
+            { key: 'mid', label: '🟡 Partial' },
+            { key: 'low', label: '🔴 Weak' },
           ].map(f => (
             <button
               key={f.key}
               onClick={() => setFilter(f.key)}
               style={{
-                padding: '8px 16px', borderRadius: '100px',
+                padding: '8px 14px', borderRadius: '100px',
                 border: '1px solid var(--border)',
                 background: filter === f.key ? 'var(--accent)' : 'var(--card)',
                 color: filter === f.key ? 'white' : 'var(--text)',
@@ -190,28 +203,41 @@ export default function Results({ results, onBack }) {
               whileHover={{ y: -2, boxShadow: '0 12px 40px rgba(0,0,0,0.08)' }}
               style={{
                 background: 'var(--card)', borderRadius: '20px',
-                padding: '28px', border: '1px solid var(--border)',
+                padding: isMobile ? '20px' : '28px',
+                border: '1px solid var(--border)',
                 transition: 'box-shadow 0.3s ease'
               }}>
 
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '16px' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                  {i === 0 && <Trophy size={20} color="#F59E0B" />}
-                  <div>
-                    <h3 style={{ fontFamily: 'Syne', fontWeight: 700, fontSize: '20px' }}>{candidate.name}</h3>
-                    <p style={{ color: 'var(--muted)', fontSize: '13px', marginTop: '2px' }}>{candidate.fileName}</p>
+              <div style={{
+                display: 'flex', justifyContent: 'space-between',
+                alignItems: 'flex-start', marginBottom: '16px',
+                gap: '12px'
+              }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flex: 1, minWidth: 0 }}>
+                  {i === 0 && <Trophy size={20} color="#F59E0B" style={{ flexShrink: 0 }} />}
+                  <div style={{ minWidth: 0 }}>
+                    <h3 style={{
+                      fontFamily: 'Syne', fontWeight: 700,
+                      fontSize: isMobile ? '16px' : '20px',
+                      overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap'
+                    }}>{candidate.name}</h3>
+                    <p style={{
+                      color: 'var(--muted)', fontSize: '12px', marginTop: '2px',
+                      overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap'
+                    }}>{candidate.fileName}</p>
                   </div>
                 </div>
 
-                <div style={{ textAlign: 'right' }}>
+                <div style={{ textAlign: 'right', flexShrink: 0 }}>
                   <div style={{
-                    fontSize: '32px', fontWeight: 800, fontFamily: 'Syne',
+                    fontSize: isMobile ? '24px' : '32px',
+                    fontWeight: 800, fontFamily: 'Syne',
                     color: getScoreColor(candidate.matchScore)
                   }}>
                     {candidate.matchScore}%
                   </div>
                   <div style={{
-                    fontSize: '12px', fontWeight: 600,
+                    fontSize: '11px', fontWeight: 600,
                     color: getScoreColor(candidate.matchScore),
                     background: `${getScoreColor(candidate.matchScore)}18`,
                     padding: '4px 10px', borderRadius: '100px',
@@ -243,7 +269,11 @@ export default function Results({ results, onBack }) {
                 {candidate.summary}
               </p>
 
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
+              <div style={{
+                display: 'grid',
+                gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr',
+                gap: '16px'
+              }}>
                 {/* Matched Skills */}
                 <div>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '10px' }}>

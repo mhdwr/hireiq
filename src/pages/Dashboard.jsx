@@ -12,6 +12,8 @@ export default function Dashboard({ onResults }) {
   const [error, setError] = useState('')
   const [dragging, setDragging] = useState(false)
 
+  const isMobile = window.innerWidth < 768
+
   const handleFiles = (files) => {
     const pdfs = Array.from(files).filter(f => f.type === 'application/pdf')
     setCvFiles(prev => [...prev, ...pdfs])
@@ -68,12 +70,7 @@ export default function Dashboard({ onResults }) {
 
       for (const file of cvFiles) {
         const cvText = await readFileAsText(file)
-
-        const response = await axios.post('/api/screen', {
-          cvText,
-          jobDesc
-        })
-
+        const response = await axios.post('/api/screen', { cvText, jobDesc })
         const parsed = response.data
         results.push({ ...parsed, fileName: file.name })
         await delay(2000)
@@ -91,7 +88,7 @@ export default function Dashboard({ onResults }) {
   }
 
   return (
-    <div style={{ minHeight: '100vh', background: 'var(--bg)', padding: '40px' }}>
+    <div style={{ minHeight: '100vh', background: 'var(--bg)', padding: isMobile ? '20px' : '40px' }}>
       <motion.div
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -107,8 +104,12 @@ export default function Dashboard({ onResults }) {
           </div>
           <span style={{ fontFamily: 'Syne', fontWeight: 800, fontSize: '22px' }}>HireIQ</span>
         </div>
-        <h1 style={{ fontSize: '36px', fontWeight: 800, fontFamily: 'Syne' }}>CV Screening Dashboard</h1>
-        <p style={{ color: 'var(--muted)', marginTop: '8px' }}>Upload CVs and paste job description to get AI-powered shortlist</p>
+        <h1 style={{ fontSize: isMobile ? '26px' : '36px', fontWeight: 800, fontFamily: 'Syne' }}>
+          CV Screening Dashboard
+        </h1>
+        <p style={{ color: 'var(--muted)', marginTop: '8px', fontSize: isMobile ? '14px' : '16px' }}>
+          Upload CVs and paste job description to get AI-powered shortlist
+        </p>
       </motion.div>
 
       <div style={{ maxWidth: '900px', margin: '0 auto', display: 'grid', gap: '24px' }}>
@@ -125,15 +126,15 @@ export default function Dashboard({ onResults }) {
             style={{
               border: `2px dashed ${dragging ? 'var(--accent)' : 'var(--border)'}`,
               borderRadius: '20px',
-              padding: '48px',
+              padding: isMobile ? '32px 20px' : '48px',
               textAlign: 'center',
               cursor: 'pointer',
               background: dragging ? 'rgba(108,99,255,0.05)' : 'var(--card)',
               transition: 'all 0.3s ease'
             }}>
             <Upload size={40} color="var(--accent)" style={{ margin: '0 auto 16px' }} />
-            <h3 style={{ fontFamily: 'Syne', fontWeight: 700, fontSize: '20px', marginBottom: '8px' }}>
-              Drop CVs here or click to upload
+            <h3 style={{ fontFamily: 'Syne', fontWeight: 700, fontSize: isMobile ? '16px' : '20px', marginBottom: '8px' }}>
+              {isMobile ? 'Tap to upload CVs' : 'Drop CVs here or click to upload'}
             </h3>
             <p style={{ color: 'var(--muted)', fontSize: '14px' }}>Supports PDF files — upload multiple at once</p>
             <input
@@ -163,11 +164,14 @@ export default function Dashboard({ onResults }) {
                       background: 'var(--card)', borderRadius: '12px',
                       padding: '12px 16px', border: '1px solid var(--border)'
                     }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                      <FileText size={16} color="var(--accent)" />
-                      <span style={{ fontSize: '14px', fontWeight: 500 }}>{file.name}</span>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px', overflow: 'hidden' }}>
+                      <FileText size={16} color="var(--accent)" style={{ flexShrink: 0 }} />
+                      <span style={{
+                        fontSize: '14px', fontWeight: 500,
+                        overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap'
+                      }}>{file.name}</span>
                     </div>
-                    <button onClick={() => removeFile(i)} style={{ background: 'none', border: 'none', cursor: 'pointer' }}>
+                    <button onClick={() => removeFile(i)} style={{ background: 'none', border: 'none', cursor: 'pointer', flexShrink: 0 }}>
                       <X size={16} color="var(--muted)" />
                     </button>
                   </motion.div>
@@ -188,14 +192,15 @@ export default function Dashboard({ onResults }) {
             value={jobDesc}
             onChange={(e) => setJobDesc(e.target.value)}
             placeholder="Paste your full job description here — required skills, experience, responsibilities..."
-            rows={8}
+            rows={isMobile ? 6 : 8}
             style={{
               width: '100%', padding: '20px',
               borderRadius: '16px', border: '1px solid var(--border)',
               background: 'var(--card)', fontFamily: 'DM Sans',
               fontSize: '15px', color: 'var(--text)',
               resize: 'vertical', outline: 'none',
-              transition: 'border 0.3s ease'
+              transition: 'border 0.3s ease',
+              boxSizing: 'border-box'
             }}
             onFocus={(e) => e.target.style.border = '1px solid var(--accent)'}
             onBlur={(e) => e.target.style.border = '1px solid var(--border)'}
@@ -228,7 +233,8 @@ export default function Dashboard({ onResults }) {
             width: '100%',
             background: loading ? 'var(--muted)' : 'linear-gradient(135deg, var(--accent), var(--accent2))',
             color: 'white', border: 'none', borderRadius: '16px',
-            padding: '20px', fontSize: '18px',
+            padding: isMobile ? '16px' : '20px',
+            fontSize: isMobile ? '16px' : '18px',
             fontFamily: 'Syne', fontWeight: 700,
             cursor: loading ? 'not-allowed' : 'pointer',
             display: 'flex', alignItems: 'center',

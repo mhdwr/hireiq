@@ -2,6 +2,8 @@ import { motion } from 'framer-motion'
 import { Sparkles, Zap, Target, ChevronRight } from 'lucide-react'
 
 export default function Landing({ onStart }) {
+  const isMobile = window.innerWidth < 768
+
   return (
     <div style={{
       minHeight: '100vh',
@@ -31,7 +33,7 @@ export default function Landing({ onStart }) {
         transition={{ duration: 0.6 }}
         style={{
           display: 'flex', justifyContent: 'space-between',
-          alignItems: 'center', padding: '24px 60px',
+          alignItems: 'center', padding: isMobile ? '16px 20px' : '24px 60px',
           borderBottom: '1px solid var(--border)',
           background: 'rgba(248,247,255,0.8)',
           backdropFilter: 'blur(10px)',
@@ -55,8 +57,9 @@ export default function Landing({ onStart }) {
           style={{
             background: 'var(--primary)', color: 'white',
             border: 'none', borderRadius: '12px',
-            padding: '12px 28px', fontFamily: 'Syne',
-            fontWeight: 700, fontSize: '15px', cursor: 'pointer'
+            padding: isMobile ? '10px 18px' : '12px 28px',
+            fontFamily: 'Syne',
+            fontWeight: 700, fontSize: isMobile ? '13px' : '15px', cursor: 'pointer'
           }}>
           Get Started
         </motion.button>
@@ -65,7 +68,8 @@ export default function Landing({ onStart }) {
       {/* Hero */}
       <div style={{
         maxWidth: '900px', margin: '0 auto',
-        padding: '100px 40px', textAlign: 'center'
+        padding: isMobile ? '60px 20px' : '100px 40px',
+        textAlign: 'center'
       }}>
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -87,7 +91,10 @@ export default function Landing({ onStart }) {
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.3, duration: 0.7 }}
-          style={{ fontSize: '72px', fontWeight: 800, lineHeight: 1.1, marginBottom: '24px' }}>
+          style={{
+            fontSize: isMobile ? '38px' : '72px',
+            fontWeight: 800, lineHeight: 1.1, marginBottom: '24px'
+          }}>
           Hire Smarter,{' '}
           <span style={{
             background: 'linear-gradient(135deg, var(--accent), var(--accent2))',
@@ -102,8 +109,10 @@ export default function Landing({ onStart }) {
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.4, duration: 0.7 }}
           style={{
-            fontSize: '20px', color: 'var(--muted)',
-            lineHeight: 1.7, marginBottom: '48px', maxWidth: '600px', margin: '0 auto 48px'
+            fontSize: isMobile ? '16px' : '20px',
+            color: 'var(--muted)',
+            lineHeight: 1.7, marginBottom: '48px',
+            maxWidth: '600px', margin: '0 auto 48px'
           }}>
           Upload hundreds of CVs, paste your job description, and let AI rank
           the best candidates in seconds — not days.
@@ -119,7 +128,8 @@ export default function Landing({ onStart }) {
           style={{
             background: 'linear-gradient(135deg, var(--accent), var(--accent2))',
             color: 'white', border: 'none', borderRadius: '16px',
-            padding: '18px 48px', fontSize: '18px',
+            padding: isMobile ? '14px 32px' : '18px 48px',
+            fontSize: isMobile ? '16px' : '18px',
             fontFamily: 'Syne', fontWeight: 700, cursor: 'pointer',
             display: 'inline-flex', alignItems: 'center', gap: '10px'
           }}>
@@ -133,7 +143,8 @@ export default function Landing({ onStart }) {
           transition={{ delay: 0.7, duration: 0.7 }}
           style={{
             display: 'flex', justifyContent: 'center',
-            gap: '60px', marginTop: '80px'
+            gap: isMobile ? '24px' : '60px', marginTop: '80px',
+            flexWrap: 'wrap'
           }}>
           {[
             { num: '10x', label: 'Faster Screening' },
@@ -142,7 +153,8 @@ export default function Landing({ onStart }) {
           ].map((stat) => (
             <div key={stat.label} style={{ textAlign: 'center' }}>
               <div style={{
-                fontSize: '40px', fontWeight: 800,
+                fontSize: isMobile ? '28px' : '40px',
+                fontWeight: 800,
                 fontFamily: 'Syne',
                 background: 'linear-gradient(135deg, var(--accent), var(--accent2))',
                 WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent'
@@ -158,7 +170,8 @@ export default function Landing({ onStart }) {
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.9, duration: 0.7 }}
           style={{
-            display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)',
+            display: 'grid',
+            gridTemplateColumns: isMobile ? '1fr' : 'repeat(3, 1fr)',
             gap: '24px', marginTop: '80px'
           }}>
           {[
