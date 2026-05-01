@@ -15,8 +15,11 @@ export default function Dashboard({ onResults }) {
   const isMobile = window.innerWidth < 768
 
   const handleFiles = (files) => {
-    const pdfs = Array.from(files).filter(f => f.type === 'application/pdf')
-    setCvFiles(prev => [...prev, ...pdfs])
+    const valid = Array.from(files).filter(f =>
+      f.type === 'application/pdf' ||
+      f.type === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+    )
+    setCvFiles(prev => [...prev, ...valid])
   }
 
   const handleDrop = useCallback((e) => {
@@ -57,6 +60,13 @@ export default function Dashboard({ onResults }) {
     })
   }
 
+  const readWordAsText = async (file) => {
+    const mammoth = await import('mammoth')
+    const arrayBuffer = await file.arrayBuffer()
+    const result = await mammoth.extractRawText({ arrayBuffer })
+    return result.value
+  }
+
   const screenCVs = async () => {
     if (cvFiles.length === 0 || !jobDesc.trim()) {
       setError('Please upload CVs and enter a job description!')
@@ -69,7 +79,10 @@ export default function Dashboard({ onResults }) {
       const results = []
 
       for (const file of cvFiles) {
-        const cvText = await readFileAsText(file)
+        const cvText = file.type === 'application/pdf'
+          ? await readFileAsText(file)
+          : await readWordAsText(file)
+
         const response = await axios.post('/api/screen', { cvText, jobDesc })
         const parsed = response.data
         results.push({ ...parsed, fileName: file.name })
@@ -136,12 +149,14 @@ export default function Dashboard({ onResults }) {
             <h3 style={{ fontFamily: 'Syne', fontWeight: 700, fontSize: isMobile ? '16px' : '20px', marginBottom: '8px' }}>
               {isMobile ? 'Tap to upload CVs' : 'Drop CVs here or click to upload'}
             </h3>
-            <p style={{ color: 'var(--muted)', fontSize: '14px' }}>Supports PDF files — upload multiple at once</p>
+            <p style={{ color: 'var(--muted)', fontSize: '14px' }}>
+              Supports PDF & Word files — upload multiple at once
+            </p>
             <input
               id="fileInput"
               type="file"
               multiple
-              accept=".pdf"
+              accept=".pdf,.docx"
               style={{ display: 'none' }}
               onChange={(e) => handleFiles(e.target.files)}
             />
