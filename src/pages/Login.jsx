@@ -33,9 +33,16 @@ export default function Login({ onLogin }) {
         setLoading(false)
         return
       } else {
-        await signInWithEmailAndPassword(auth, email, password)
+  const userCred = await signInWithEmailAndPassword(auth, email, password)
+        await userCred.user.reload()
+        if (!userCred.user.emailVerified) {
+            setError('Please verify your email before logging in. Check your inbox.')
+            await auth.signOut()
+            setLoading(false)
+            return
+        }
         onLogin()
-      }
+    }
     } catch (err) {
   const code = err.code
   if (code === 'auth/user-not-found' || code === 'auth/invalid-credential') {
