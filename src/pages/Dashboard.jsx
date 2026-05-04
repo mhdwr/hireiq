@@ -10,6 +10,7 @@ export default function Dashboard({ onResults }) {
   const [jobDesc, setJobDesc] = useState('')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
+  const [progress, setProgress] = useState({ current: 0, total: 0 })
   const [dragging, setDragging] = useState(false)
 
   const isMobile = window.innerWidth < 768
@@ -68,36 +69,107 @@ export default function Dashboard({ onResults }) {
   }
 
   const screenCVs = async () => {
-    if (cvFiles.length === 0 || !jobDesc.trim()) {
-      setError('Please upload CVs and enter a job description!')
+    // Clear previous errors
+    setError('')
+
+    // Validate inputs
+    if (cvFiles.length === 0) {
+      setError('Please upload at least one CV before screening.')
       return
     }
-    setError('')
+
+    if (!jobDesc.trim()) {
+      setError('Please enter a job description before screening.')
+      return
+    }
+
+    if (jobDesc.trim().length < 50) {
+      setError('Job description is too short. Please add more detail.')
+      return
+    }
+
     setLoading(true)
+    setProgress({ current: 0, total: cvFiles.length })
 
-    try {
-      const results = []
+    const results = []
+    const failed = []
 
-      for (const file of cvFiles) {
-        const cvText = file.type === 'application/pdf'
-          ? await readFileAsText(file)
-          : await readWordAsText(file)
+    for (let i = 0; i < cvFiles.length; i++) {
+      const file = cvFiles[i]
 
-        const response = await axios.post('/api/screen', { cvText, jobDesc })
-        const parsed = response.data
-        results.push({ ...parsed, fileName: file.name })
-        await delay(2000)
+      // Update progress for each file
+      setProgress({ current: i + 1, total: cvFiles.length })
+
+      // Check file size — max 5MB
+      if (file.size > 5 * 1024 * 1024) {
+        failed.push({ name: file.name, reason: 'File too large. Maximum size is 5MB.' })
+        continue
       }
 
-      results.sort((a, b) => b.matchScore - a.matchScore)
-      onResults(results)
+      try {
+        // Extract text based on file type
+        let cvText = ''
+        if (file.type === 'application/pdf') {
+          cvText = await readFileAsText(file)
+        } else {
+          cvText = await readWordAsText(file)
+        }
 
-    } catch (err) {
-      setError('Something went wrong. Check your API key or try again!')
-      console.error(err)
+        // Check if file had readable content
+        if (!cvText || cvText.trim().length < 50) {
+          failed.push({ name: file.name, reason: 'Could not read file. It may be empty or scanned image.' })
+          continue
+        }
+
+        // Send to backend API
+        const response = await axios.post('/api/screen', {
+          cvText,
+          jobDesc: jobDesc.trim()
+        })
+
+        results.push({ ...response.data, fileName: file.name })
+        await delay(2000)
+
+      } catch (err) {
+        if (err.response) {
+          const status = err.response.status
+          const message = err.response.data?.error || 'Unknown error'
+
+          // Rate limit hit — stop processing all files
+          if (status === 429) {
+            setError('Too many requests. Please wait an hour and try again.')
+            setLoading(false)
+            return
+          }
+
+          if (status === 504) {
+            failed.push({ name: file.name, reason: 'Request timed out. Please retry.' })
+          } else if (status === 502) {
+            failed.push({ name: file.name, reason: 'AI service error. Please retry.' })
+          } else {
+            failed.push({ name: file.name, reason: message })
+          }
+
+        } else if (err.request) {
+          // Request was made but no response received
+          failed.push({ name: file.name, reason: 'Network error. Check your internet connection.' })
+        } else {
+          failed.push({ name: file.name, reason: 'Unexpected error. Please retry.' })
+        }
+      }
     }
 
     setLoading(false)
+
+    // If no CV was successfully processed
+    if (results.length === 0) {
+      setError('No CVs could be processed. Please check your files and try again.')
+      return
+    }
+
+    // Sort by match score and send results
+    results.sort((a, b) => b.matchScore - a.matchScore)
+    onResults({ results, failed, jobDesc })
   }
 
   return (
@@ -222,6 +294,40 @@ export default function Dashboard({ onResults }) {
           />
         </motion.div>
 
+        {/* Progress bar — shows while screening is in progress */}
+        {loading && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            style={{
+              padding: '16px',
+              background: 'rgba(108,99,255,0.08)',
+              borderRadius: '12px',
+              border: '1px solid rgba(108,99,255,0.3)'
+            }}>
+            <p style={{ marginBottom: '10px', fontWeight: 500, fontSize: '14px' }}>
+              Screening CV {progress.current} of {progress.total}...
+            </p>
+            <div style={{
+              height: '8px',
+              background: 'var(--border)',
+              borderRadius: '99px',
+              overflow: 'hidden'
+            }}>
+              <motion.div
+                animate={{ width: `${(progress.current / progress.total) * 100}%` }}
+                transition={{ duration: 0.4, ease: 'easeOut' }}
+                style={{
+                  height: '100%',
+                  background: 'linear-gradient(90deg, var(--accent), var(--accent2))',
+                  borderRadius: '99px'
+                }}
+              />
+            </div>
+          </motion.div>
+        )}
+
+        {/* Error message */}
         {error && (
           <motion.div
             initial={{ opacity: 0 }}
@@ -267,7 +373,7 @@ export default function Dashboard({ onResults }) {
                   borderTopColor: 'transparent',
                   borderRadius: '50%'
                 }} />
-              Screening CVs...
+              Screening CV {progress.current} of {progress.total}...
             </>
           ) : (
             <>

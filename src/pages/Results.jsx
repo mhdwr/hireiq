@@ -1,10 +1,14 @@
 import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { ArrowLeft, Download, Sparkles, CheckCircle, XCircle, Trophy, Filter } from 'lucide-react'
+import { ArrowLeft, Download, Sparkles, CheckCircle, XCircle, Trophy, Filter, AlertTriangle } from 'lucide-react'
 
-export default function Results({ results, onBack }) {
+export default function Results({ data, onBack }) {
   const [filter, setFilter] = useState('all')
   const [sortBy, setSortBy] = useState('score')
+
+  // Support both old format (results array) and new format ({ results, failed, jobDesc })
+  const results = data?.results ?? (Array.isArray(data) ? data : [])
+  const failed = data?.failed ?? []
 
   const isMobile = window.innerWidth < 768
 
@@ -137,6 +141,34 @@ export default function Results({ results, onBack }) {
           ))}
         </div>
       </motion.div>
+
+      {/* Failed Files Warning — shows only if some CVs failed */}
+      {failed.length > 0 && (
+        <motion.div
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          style={{
+            maxWidth: '1000px', margin: '0 auto 24px',
+            padding: '16px 20px',
+            background: 'rgba(245,158,11,0.08)',
+            border: '1px solid rgba(245,158,11,0.3)',
+            borderRadius: '16px'
+          }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '10px' }}>
+            <AlertTriangle size={16} color="#F59E0B" />
+            <span style={{ fontWeight: 700, fontFamily: 'Syne', fontSize: '14px', color: '#F59E0B' }}>
+              {failed.length} file{failed.length > 1 ? 's' : ''} could not be processed
+            </span>
+          </div>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+            {failed.map((f, i) => (
+              <p key={i} style={{ fontSize: '13px', color: 'var(--muted)', margin: 0 }}>
+                <strong style={{ color: 'var(--text)' }}>{f.name}</strong> — {f.reason}
+              </p>
+            ))}
+          </div>
+        </motion.div>
+      )}
 
       {/* Filters */}
       <motion.div
@@ -274,7 +306,6 @@ export default function Results({ results, onBack }) {
                 gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr',
                 gap: '16px'
               }}>
-                {/* Matched Skills */}
                 <div>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '10px' }}>
                     <CheckCircle size={14} color="#00D4AA" />
@@ -292,7 +323,6 @@ export default function Results({ results, onBack }) {
                   </div>
                 </div>
 
-                {/* Missing Skills */}
                 <div>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '10px' }}>
                     <XCircle size={14} color="#FF5050" />
