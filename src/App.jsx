@@ -39,7 +39,12 @@ useEffect(() => {
     </div>
   )
 
-  if (!user) return <Login onLogin={() => setPage('dashboard')} />
+  if (!user) return <Login onLogin={() => {
+  auth.currentUser?.reload().then(() => {
+    setUser(auth.currentUser)
+    setPage('dashboard')
+  })
+}} />
 
   return (
     <>
