@@ -11,6 +11,12 @@ function App() {
   const [results, setResults] = useState([])
   const [user, setUser] = useState(null)
   const [authLoading, setAuthLoading] = useState(true)
+const [minLoadDone, setMinLoadDone] = useState(false)
+
+useEffect(() => {
+  const timer = setTimeout(() => setMinLoadDone(true), 2500)
+  return () => clearTimeout(timer)
+}, [])
 
 useEffect(() => {
   const unsub = onAuthStateChanged(auth, async (u) => {
@@ -29,7 +35,7 @@ useEffect(() => {
   return () => unsub()
 }, [])
 
-if (authLoading) return (
+if (authLoading || !minLoadDone) return (
     <div style={{
       minHeight: '100vh', background: 'var(--bg)',
       display: 'flex', flexDirection: 'column',
