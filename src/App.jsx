@@ -11,31 +11,31 @@ function App() {
   const [results, setResults] = useState([])
   const [user, setUser] = useState(null)
   const [authLoading, setAuthLoading] = useState(true)
-const [minLoadDone, setMinLoadDone] = useState(false)
+  const [minLoadDone, setMinLoadDone] = useState(false)
 
-useEffect(() => {
-  const timer = setTimeout(() => setMinLoadDone(true), 2500)
-  return () => clearTimeout(timer)
-}, [])
+  useEffect(() => {
+    const timer = setTimeout(() => setMinLoadDone(true), 2500)
+    return () => clearTimeout(timer)
+  }, [])
 
-useEffect(() => {
-  const unsub = onAuthStateChanged(auth, async (u) => {
-    if (u) {
-      await u.reload()
-      if (!u.emailVerified && u.providerData[0]?.providerId === 'password') {
-        setUser(null)
+  useEffect(() => {
+    const unsub = onAuthStateChanged(auth, async (u) => {
+      if (u) {
+        await u.reload()
+        if (!u.emailVerified && u.providerData[0]?.providerId === 'password') {
+          setUser(null)
+        } else {
+          setUser(u)
+        }
       } else {
-        setUser(u)
+        setUser(null)
       }
-    } else {
-      setUser(null)
-    }
-    setAuthLoading(false)
-  })
-  return () => unsub()
-}, [])
+      setAuthLoading(false)
+    })
+    return () => unsub()
+  }, [])
 
-if (authLoading || !minLoadDone) return (
+  if (authLoading || !minLoadDone) return (
     <div style={{
       minHeight: '100vh', background: 'var(--bg)',
       display: 'flex', flexDirection: 'column',
@@ -54,12 +54,8 @@ if (authLoading || !minLoadDone) return (
           from { opacity: 0; transform: translateY(10px); }
           to { opacity: 1; transform: translateY(0); }
         }
-        @keyframes spin {
-          to { transform: rotate(360deg); }
-        }
       `}</style>
 
-      {/* Logo Icon */}
       <div style={{
         width: '72px', height: '72px',
         background: 'linear-gradient(135deg, #6C63FF, #00D4AA)',
@@ -70,13 +66,7 @@ if (authLoading || !minLoadDone) return (
       }}>
         <img src="/logo.svg" alt="HireIQ" style={{ width: '44px', height: '44px', objectFit: 'contain' }} />
       </div>
-        <svg width="36" height="36" viewBox="0 0 24 24" fill="none">
-          <path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z"
-            fill="white" strokeWidth="0"/>
-        </svg>
-      </div>
 
-      {/* HireIQ Text */}
       <div style={{
         fontFamily: 'Syne', fontWeight: 800, fontSize: '28px',
         background: 'linear-gradient(90deg, #6C63FF, #00D4AA, #6C63FF)',
@@ -87,17 +77,15 @@ if (authLoading || !minLoadDone) return (
       }}>
         HireIQ
       </div>
-
-
     </div>
   )
 
   if (!user) return <Login onLogin={() => {
-  auth.currentUser?.reload().then(() => {
-    setUser(auth.currentUser)
-    setPage('dashboard')
-  })
-}} />
+    auth.currentUser?.reload().then(() => {
+      setUser(auth.currentUser)
+      setPage('dashboard')
+    })
+  }} />
 
   return (
     <>
