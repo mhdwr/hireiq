@@ -1,38 +1,15 @@
-import { initializeApp, cert, getApps } from 'firebase-admin/app'
-import { getAuth } from 'firebase-admin/auth'
-
-// Firebase Admin initialize karo (sirf ek baar)
-if (!getApps().length) {
-  initializeApp({
-    credential: cert({
-      projectId: process.env.FIREBASE_PROJECT_ID,
-      clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
-      privateKey: process.env.FIREBASE_PRIVATE_KEY?.replace(/\\n/g, '\n')
-    })
-  })
-}
-
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' })
   }
 
-  const { email } = req.body
+  const { email, verificationLink } = req.body
 
-  if (!email) {
-    return res.status(400).json({ error: 'Email is required' })
+  if (!email || !verificationLink) {
+    return res.status(400).json({ error: 'Missing fields' })
   }
 
   try {
-    // Firebase Admin se user dhundo
-    const user = await getAuth().getUserByEmail(email)
-
-    // Verification link generate karo
-    const verificationLink = await getAuth().generateEmailVerificationLink(email, {
-      url: 'https://hireiq-chi.vercel.app'
-    })
-
-    // Resend se professional email bhejo
     const response = await fetch('https://api.resend.com/emails', {
       method: 'POST',
       headers: {
@@ -73,7 +50,7 @@ export default async function handler(req, res) {
     return res.status(200).json({ success: true })
 
   } catch (err) {
-    console.error('Verification error:', err)
-    return res.status(500).json({ error: 'Something went wrong. Please try again.' })
+    console.error('Error:', err)
+    return res.status(500).json({ error: 'Something went wrong.' })
   }
 }
