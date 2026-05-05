@@ -20,7 +20,7 @@ export default function Login({ onLogin }) {
         await sendEmailVerification(userCred.user, {
           url: 'https://hireiq-chi.vercel.app'
         })
-        setError('✅ Verification email sent! Please check your inbox and verify your account before logging in.')
+        setError('✅ Verification email sent! Check your inbox or spam folder.')
         setIsSignup(false)
         setLoading(false)
         return
@@ -36,6 +36,7 @@ export default function Login({ onLogin }) {
         onLogin()
       }
     } catch (err) {
+      console.error('Full error:', err) // For debug
       const code = err.code
       if (code === 'auth/user-not-found' || code === 'auth/invalid-credential') {
         setError('No account found with this email. Please sign up first.')
