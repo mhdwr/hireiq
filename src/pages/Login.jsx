@@ -16,23 +16,19 @@ export default function Login({ onLogin }) {
     setError('')
     try {
       if (isSignup) {
-        const userCred = await createUserWithEmailAndPassword(auth, email, password)
-        await sendEmailVerification(userCred.user)
+  const userCred = await createUserWithEmailAndPassword(auth, email, password)
+  
+await fetch('/api/sendVerification', {
+  method: 'POST',
+  headers: { 'Content-Type': 'application/json' },
+  body: JSON.stringify({ email })
+})
 
-        await fetch('/api/sendVerification', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            email,
-            verificationLink: `https://hireiq-9a7b8.firebaseapp.com/__/auth/action?mode=verifyEmail`
-          })
-        })
-
-        setError('✅ Verification email sent! Please check your inbox and verify your account before logging in.')
-        setIsSignup(false)
-        setLoading(false)
-        return
-      } else {
+  setError('✅ Verification email sent! Please check your inbox and verify your account before logging in.')
+  setIsSignup(false)
+  setLoading(false)
+  return
+} else {
   const userCred = await signInWithEmailAndPassword(auth, email, password)
         await userCred.user.reload()
         if (!userCred.user.emailVerified) {
