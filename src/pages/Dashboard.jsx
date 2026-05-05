@@ -1,3 +1,5 @@
+import { db } from '../firebase'
+import { collection, addDoc, serverTimestamp } from 'firebase/firestore'
 import { useState, useCallback } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Upload, FileText, Sparkles, X, AlertCircle } from 'lucide-react'
@@ -169,7 +171,22 @@ export default function Dashboard({ onResults }) {
 
     // Sort by match score and send results
     results.sort((a, b) => b.matchScore - a.matchScore)
-    onResults({ results, failed, jobDesc })
+
+    // Firebase mein save karo
+      try {
+      await addDoc(collection(db, 'screenings'), {
+        uid: user.uid,
+        jobDesc: jobDesc.trim(),
+        cvNames: cvFiles.map(f => f.name),
+        results,
+        failed,
+        createdAt: serverTimestamp()
+      })
+    } catch (e) {
+  console.error('History save error:', e)
+}
+
+onResults({ results, failed, jobDesc })
   }
 
   return (
