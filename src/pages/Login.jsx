@@ -15,58 +15,46 @@ export default function Login({ onLogin }) {
     setLoading(true)
     setError('')
     try {
-if (isSignup) {
-  const userCred = await createUserWithEmailAndPassword(auth, email, password)
-  
-  // Firebase se verification link lo
-  await sendEmailVerification(userCred.user)
-  const verificationLink = await userCred.user.getIdToken()
-  
-  // Resend se email bhejo Firebase ke link ke saath
-  await fetch('/api/sendVerification', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ 
-      email,
-      verificationLink: `https://hireiq-9a7b8.firebaseapp.com/__/auth/action?mode=verifyEmail`
-    })
-  })
-
-  setError('✅ Verification email sent! Please check your inbox and verify your account before logging in.')
-  setIsSignup(false)
-  setLoading(false)
-  return
-} else {
-  const userCred = await signInWithEmailAndPassword(auth, email, password)
+      if (isSignup) {
+        const userCred = await createUserWithEmailAndPassword(auth, email, password)
+        await sendEmailVerification(userCred.user, {
+          url: 'https://hireiq-chi.vercel.app'
+        })
+        setError('✅ Verification email sent! Please check your inbox and verify your account before logging in.')
+        setIsSignup(false)
+        setLoading(false)
+        return
+      } else {
+        const userCred = await signInWithEmailAndPassword(auth, email, password)
         await userCred.user.reload()
         if (!userCred.user.emailVerified) {
-            setError('Please verify your email before logging in. Check your inbox.')
-            await auth.signOut()
-            setLoading(false)
-            return
+          setError('Please verify your email before logging in. Check your inbox.')
+          await auth.signOut()
+          setLoading(false)
+          return
         }
         onLogin()
-    }
+      }
     } catch (err) {
-  const code = err.code
-  if (code === 'auth/user-not-found' || code === 'auth/invalid-credential') {
-    setError('No account found with this email. Please sign up first.')
-  } else if (code === 'auth/wrong-password') {
-    setError('Incorrect password. Please try again.')
-  } else if (code === 'auth/invalid-email') {
-    setError('Please enter a valid email address.')
-  } else if (code === 'auth/too-many-requests') {
-    setError('Too many failed attempts. Please try again later.')
-  } else if (code === 'auth/email-already-in-use') {
-    setError('An account with this email already exists. Please sign in.')
-  } else if (code === 'auth/weak-password') {
-    setError('Password must be at least 6 characters long.')
-  } else {
-    setError('Something went wrong. Please try again.')
+      const code = err.code
+      if (code === 'auth/user-not-found' || code === 'auth/invalid-credential') {
+        setError('No account found with this email. Please sign up first.')
+      } else if (code === 'auth/wrong-password') {
+        setError('Incorrect password. Please try again.')
+      } else if (code === 'auth/invalid-email') {
+        setError('Please enter a valid email address.')
+      } else if (code === 'auth/too-many-requests') {
+        setError('Too many failed attempts. Please try again later.')
+      } else if (code === 'auth/email-already-in-use') {
+        setError('An account with this email already exists. Please sign in.')
+      } else if (code === 'auth/weak-password') {
+        setError('Password must be at least 6 characters long.')
+      } else {
+        setError('Something went wrong. Please try again.')
+      }
+    }
+    setLoading(false)
   }
-}
-setLoading(false)
-}
 
   const handleGoogle = async () => {
     setLoading(true)
@@ -75,17 +63,17 @@ setLoading(false)
       await signInWithPopup(auth, googleProvider)
       onLogin()
     } catch (err) {
-  const code = err.code
-  if (code === 'auth/popup-closed-by-user') {
-    setError('Google sign-in was cancelled. Please try again.')
-  } else if (code === 'auth/network-request-failed') {
-    setError('Network error. Please check your connection.')
-  } else {
-    setError('Google sign-in failed. Please try again.')
+      const code = err.code
+      if (code === 'auth/popup-closed-by-user') {
+        setError('Google sign-in was cancelled. Please try again.')
+      } else if (code === 'auth/network-request-failed') {
+        setError('Network error. Please check your connection.')
+      } else {
+        setError('Google sign-in failed. Please try again.')
+      }
+    }
+    setLoading(false)
   }
-}
-setLoading(false)
-}
 
   return (
     <div style={{
