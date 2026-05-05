@@ -68,6 +68,8 @@ if (authLoading || !minLoadDone) return (
         animation: 'pulse 2s ease-in-out infinite',
         boxShadow: '0 0 40px rgba(108,99,255,0.3)'
       }}>
+        <img src="/logo.png" alt="HireIQ" style={{ width: '44px', height: '44px', objectFit: 'contain' }} />
+      </div>
         <svg width="36" height="36" viewBox="0 0 24 24" fill="none">
           <path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z"
             fill="white" strokeWidth="0"/>
@@ -86,14 +88,7 @@ if (authLoading || !minLoadDone) return (
         HireIQ
       </div>
 
-      {/* Spinner */}
-      <div style={{
-        width: '28px', height: '28px',
-        border: '2.5px solid rgba(108,99,255,0.15)',
-        borderTop: '2.5px solid #6C63FF',
-        borderRadius: '50%',
-        animation: 'spin 0.8s linear infinite'
-      }} />
+
     </div>
   )
 
