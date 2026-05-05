@@ -184,6 +184,24 @@ export default function Login({ onLogin }) {
           </div>
         </div>
 
+        {/* Terms */}
+        {isSignup && (
+          <p style={{
+            fontSize: '12px', color: 'var(--muted)',
+            textAlign: 'center', marginBottom: '16px',
+            lineHeight: '1.6'
+          }}>
+            By creating an account, you agree to our{' '}
+            <span style={{ color: 'var(--accent)', cursor: 'pointer', textDecoration: 'underline' }}>
+              Terms of Service
+            </span>{' '}
+            and{' '}
+            <span style={{ color: 'var(--accent)', cursor: 'pointer', textDecoration: 'underline' }}>
+              Privacy Policy
+            </span>
+          </p>
+        )}
+
         {/* Error */}
         {error && (
           <p style={{
