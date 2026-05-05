@@ -7,7 +7,7 @@ import axios from 'axios'
 
 const delay = (ms) => new Promise(resolve => setTimeout(resolve, ms))
 
-export default function Dashboard({ onResults }) {
+export default function Dashboard({ onResults, user }) {
   const [cvFiles, setCvFiles] = useState([])
   const [jobDesc, setJobDesc] = useState('')
   const [loading, setLoading] = useState(false)
