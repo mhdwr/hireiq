@@ -192,13 +192,13 @@ export default function Login({ onLogin }) {
             lineHeight: '1.6'
           }}>
             By creating an account, you agree to our{' '}
-            <span style={{ color: 'var(--accent)', cursor: 'pointer', textDecoration: 'underline' }}>
+            <a href="/terms.html" target="_blank" style={{ color: 'var(--accent)', textDecoration: 'underline' }}>
               Terms of Service
-            </span>{' '}
-            and{' '}
-            <span style={{ color: 'var(--accent)', cursor: 'pointer', textDecoration: 'underline' }}>
+            </a>
+            {' '}and{' '}
+            <a href="/privacy.html" target="_blank" style={{ color: 'var(--accent)', textDecoration: 'underline' }}>
               Privacy Policy
-            </span>
+            </a>
           </p>
         )}
 
